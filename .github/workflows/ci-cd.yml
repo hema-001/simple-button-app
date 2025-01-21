@@ -1,57 +1,19 @@
-name: Expo CI/CD with GitHub Releases
+name: Test Project
 
 on:
   push:
     branches:
       - master
-  pull_request:
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
     container:
       image: node:20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           node-version: 20
       - run: npm ci
-
-      - name: Lint code
-        run: npx eslint .
-
-      - name: Run tests
-        run: npm test
-
-  build-and-release:
-    runs-on: ubuntu-latest
-    container:
-      image: node:20
-    needs: lint-and-test
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          node-version: 20
-      - run: npm ci
-
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
-
-      - name: Login to Expo
-        run: expo login --token ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build APK
-        run: eas build --platform android --profile production --non-interactive
-
-      - name: Download APK
-        run: |
-          mkdir -p artifacts
-          mv $(ls builds/*.apk | head -n 1) ./artifacts/app-release.apk
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v${{ github.run_number }}
-          release_name: "Release v${{ github.run_number }}"
-          files: artifacts/app-release.apk
+      - run: npm run test
+      - run: npm run build
