@@ -20,12 +20,6 @@ jobs:
         with:
           node-version: "22.4.x"
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
-      - name: Clear npm cache
-        run: npm cache clean --force
-
       - name: Install dependencies
         run: npm ci
 
