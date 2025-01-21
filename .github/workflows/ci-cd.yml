@@ -3,7 +3,7 @@ name: Expo CI/CD with GitHub Releases
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   update:
     runs-on: ubuntu-latest
