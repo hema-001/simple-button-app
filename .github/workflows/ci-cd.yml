@@ -3,64 +3,28 @@ name: Expo CI/CD with GitHub Releases
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
+      - main
 jobs:
-  lint-and-test:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 🏗 Setup repo
         uses: actions/checkout@v4
 
-      - name: Setup Node Js
+      - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
+          cache: npm
 
-      - name: install deps
-        run: npm ci
-
-      - name: Lint code
-        run: npx eslint .
-
-      - name: Run tests
-        run: npm test
-
-  build-and-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node Js
-        uses: actions/setup-node@v4
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
         with:
-          node-version: 22.13.0
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: install deps
-        run: npm ci
+      - name: 📦 Install dependencies
+        run: npm install
 
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
-
-      - name: Login to Expo
-        run: expo login --token ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build APK
-        run: eas build --platform android --profile production --non-interactive
-
-      - name: Download APK
-        run: |
-          mkdir -p artifacts
-          mv $(ls builds/*.apk | head -n 1) ./artifacts/app-release.apk
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v${{ github.run_number }}
-          release_name: "Release v${{ github.run_number }}"
-          files: artifacts/app-release.apk
+      - name: 🚀 Build app
+        run: eas build --non-interactive
